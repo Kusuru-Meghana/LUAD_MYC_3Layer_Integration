@@ -62,3 +62,72 @@ This intersection removes:
 - indirect transcriptional effects
 
 - inaccessible regulatory regions
+
+
+## Repository Structure
+```
+LUAD_MYC_3Layer_Integration/
+│
+├── data/
+│   ├── MYC_A549_peak_annotations.csv        # MYC ChIP-seq annotated peaks
+│   ├── DESeq2_siMYC_vs_CTRL_results.csv     # RNA-seq differential expression
+│   └── ATAC_peak_annotations.csv            # ATAC-seq annotated accessible regions
+│
+├── scripts/
+│   └── 01_three_layer_integration.R         # Core integration logic
+│
+├── results/
+│   ├── MYC_3layer_genes.csv                  # Final high-confidence MYC targets
+│   ├── Top20_Direct_MYC_Targets.csv
+│   ├── Top10_Upregulated_MYC_Targets.csv
+│   ├── Top10_Downregulated_MYC_Targets.csv
+│   ├── GO_enrichment.csv
+│   ├── KEGG_enrichment.csv
+│   ├── GO_plot.png
+│   ├── KEGG_plot.png
+│   └── GO_volcano_plot.png
+│
+├── LICENSE
+└── README.md
+```
+
+## Key Results
+
+Thousands of MYC binding events were reduced to a refined set of direct MYC targets
+
+High-confidence targets are strongly enriched for:
+
+- Ribosome biogenesis
+
+- RNA processing
+
+- Cell cycle regulation
+
+- Cancer-associated metabolic pathways
+
+Demonstrates that chromatin accessibility is a critical constraint on MYC function
+
+
+## Biological Interpretation
+
+This analysis confirms that MYC acts as a global regulator of growth and proliferation, but only a subset of its binding events are transcriptionally active. Functional MYC regulation requires both chromatin accessibility and measurable transcriptional impact.
+
+Related Repositories
+
+This integration builds upon the following layer-specific analyses:
+
+- MYC ChIP-seq:
+https://github.com/Kusuru-Meghana/LUAD_MYC_ChIPseq
+
+- MYC RNA-seq:
+https://github.com/Kusuru-Meghana/LUAD_MYC_RNAseq
+
+- ChIP–RNA Integration:
+https://github.com/Kusuru-Meghana/LUAD_MYC_ChIPseq_RNAseq_Integration
+
+- MYC ATAC-seq:
+https://github.com/Kusuru-Meghana/LUAD_MYC_ATACseq
+
+## Summary
+
+This project demonstrates how multi-omics integration can be used to identify biologically meaningful transcription factor targets, moving beyond single-layer analyses to define true regulatory networks in cancer.
