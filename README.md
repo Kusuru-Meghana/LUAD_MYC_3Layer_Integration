@@ -1,133 +1,146 @@
-# LUAD_MYC_3Layer_Integration
-Multi-omics integration of MYC ChIP-seq, RNA-seq, and ATAC-seq in LUAD (A549) to identify high-confidence direct MYC target genes.
+# Integrated MYC Regulatory Network in LUAD (A549)
+### ChIP-seq + siMYC RNA-seq + ATAC-seq
 
-## Overview
+⭐ **This repository is the main entry point for the MYC multi-omics project.**
 
-This project performs a three-layer multi-omics integration of MYC ChIP-seq, RNA-seq, and ATAC-seq data in lung adenocarcinoma (LUAD, A549 cells) to identify high-confidence, functionally active MYC target genes.
+This project integrates **MYC ChIP-seq**, **siMYC RNA-seq**, and **ATAC-seq** data to identify
+**high-confidence, direct MYC target genes** in **A549 lung adenocarcinoma cells**.
+By requiring agreement across DNA binding, expression change, and chromatin accessibility,
+the analysis filters out non-functional binding events and indirect transcriptional effects.
 
-MYC is a master oncogenic transcription factor that binds thousands of genomic sites. However, binding alone does not guarantee functional regulation. This project was designed to systematically distinguish true direct MYC targets from indirect or non-functional binding events.
+---
 
-## Scientific Motivation
+## Biological Question
 
-A major challenge in transcription factor biology is that:
+**Which MYC binding events are functionally relevant in lung cancer cells, and how does chromatin
+accessibility shape MYC-dependent gene regulation?**
 
-- ChIP-seq identifies where MYC binds, but not whether that binding is functional.
+Specifically:
+- Where does MYC bind the genome?
+- Which genes change expression when MYC is knocked down?
+- Which MYC binding sites occur in open, accessible chromatin?
 
-- RNA-seq identifies expression changes, but many are indirect downstream effects.
+---
 
-- ATAC-seq identifies accessible chromatin, but not which transcription factor is responsible.
+## Dataset Overview
 
-To confidently define direct MYC targets, all three layers must agree.
+**Cell line:** A549 (human lung adenocarcinoma)
 
-## Core Question
+### Layer 1 — MYC ChIP-seq
+- Genome-wide MYC binding sites
+- Output: MYC peaks annotated to nearby genes
 
-Which genes are directly regulated by MYC in LUAD, supported by binding, expression change, and chromatin accessibility?
+### Layer 2 — RNA-seq (siMYC knockdown)
+- Conditions: Control (MYC-high) vs siMYC (MYC-low)
+- Output: Differentially expressed genes upon MYC suppression
 
-## Data Layers Integrated
-1. MYC ChIP-seq (Layer 1)
+### Layer 3 — ATAC-seq
+- Genome-wide chromatin accessibility landscape
+- Output: Open chromatin peak set
 
-- Identifies genomic regions bound by MYC
+---
 
-- Peaks annotated to nearby genes
+## Repository Design
 
-- Captures MYC’s physical DNA binding landscape
+Each data modality is implemented as a **standalone, reusable pipeline** in a separate repository.
+This repository performs the **final multi-layer integration and biological interpretation**.
 
-2. RNA-seq (Layer 2)
+This modular design mirrors real-world bioinformatics workflows and improves reproducibility,
+clarity, and reuse.
 
-- Differential expression analysis following MYC perturbation (siMYC vs control)
+---
 
-- Identifies genes transcriptionally responsive to MYC
+## Multi-Layer Integration Logic
 
-3. ATAC-seq (Layer 3)
+A gene is classified as a **high-confidence direct MYC target** if it satisfies **all three criteria**:
 
-- Identifies open chromatin regions
+1. **MYC binding**  
+   A MYC ChIP-seq peak is annotated to the gene (Layer 1)
 
-- Filters out MYC binding events occurring in inaccessible chromatin
+2. **Expression response**  
+   The gene is significantly differentially expressed after MYC knockdown (Layer 2)
 
+3. **Chromatin accessibility**  
+   The MYC binding site overlaps an ATAC-seq peak (Layer 3)
 
-## Integration Strategy
+This strategy removes:
+- Non-functional MYC binding
+- Context-dependent or inaccessible sites
+- Indirect transcriptional effects
 
-A gene is considered a high-confidence direct MYC target only if:
-
-- MYC binds near the gene (ChIP-seq)
-
-- The gene is differentially expressed upon MYC perturbation (RNA-seq)
-
-- The regulatory region is located in accessible chromatin (ATAC-seq)
-
-This intersection removes:
-
-- non-functional MYC binding
-
-- indirect transcriptional effects
-
-- inaccessible regulatory regions
-
-
-## Repository Structure
-```
-LUAD_MYC_3Layer_Integration/
-│
-├── data/
-│   ├── MYC_A549_peak_annotations.csv        # MYC ChIP-seq annotated peaks
-│   ├── DESeq2_siMYC_vs_CTRL_results.csv     # RNA-seq differential expression
-│   └── ATAC_peak_annotations.csv            # ATAC-seq annotated accessible regions
-│
-├── scripts/
-│   └── 01_three_layer_integration.R         # Core integration logic
-│
-├── results/
-│   ├── MYC_3layer_genes.csv                  # Final high-confidence MYC targets
-│   ├── Top20_Direct_MYC_Targets.csv
-│   ├── Top10_Upregulated_MYC_Targets.csv
-│   ├── Top10_Downregulated_MYC_Targets.csv
-│   ├── GO_enrichment.csv
-│   ├── KEGG_enrichment.csv
-│   ├── GO_plot.png
-│   ├── KEGG_plot.png
-│   └── GO_volcano_plot.png
-│
-├── LICENSE
-└── README.md
-```
+---
 
 ## Key Results
 
-Thousands of MYC binding events were reduced to a refined set of direct MYC targets
+- ~5,100 genes bound by MYC (ChIP-seq)
+- ~268 genes both MYC-bound **and** differentially expressed after MYC knockdown
+- ~62,000 ATAC-seq peaks defining open chromatin in A549
+- ~45% of MYC binding sites occur in accessible chromatin
+- Direct MYC targets are enriched for:
+  - Cell cycle and proliferation
+  - RNA processing and ribosome biogenesis
+  - Chromatin organization and transcriptional regulation
 
-High-confidence targets are strongly enriched for:
-
-- Ribosome biogenesis
-
-- RNA processing
-
-- Cell cycle regulation
-
-- Cancer-associated metabolic pathways
-
-Demonstrates that chromatin accessibility is a critical constraint on MYC function
-
+---
 
 ## Biological Interpretation
 
-This analysis confirms that MYC acts as a global regulator of growth and proliferation, but only a subset of its binding events are transcriptionally active. Functional MYC regulation requires both chromatin accessibility and measurable transcriptional impact.
+This analysis demonstrates that MYC functions as a **direct transcriptional amplifier**
+in A549 lung cancer cells by binding promoter-proximal, accessible chromatin regions
+of genes involved in growth and biosynthetic programs.
 
-Related Repositories
+Upon MYC knockdown:
+- Proliferative and transcriptional machinery collapses
+- Senescence, stress, and immune-related pathways become activated
 
-This integration builds upon the following layer-specific analyses:
+Integrating binding, expression, and chromatin accessibility distinguishes
+**functional MYC regulatory events** from non-productive binding,
+providing a mechanistic view of MYC-driven oncogenic regulation.
 
-- MYC ChIP-seq:
-https://github.com/Kusuru-Meghana/LUAD_MYC_ChIPseq
+---
 
-- MYC RNA-seq:
-https://github.com/Kusuru-Meghana/LUAD_MYC_RNAseq
+## Linked Standalone Pipelines
 
-- ChIP–RNA Integration:
-https://github.com/Kusuru-Meghana/LUAD_MYC_ChIPseq_RNAseq_Integration
+- **MYC ChIP-seq pipeline:**  
+  https://github.com/Kusuru-Meghana/LUAD_MYC_ChIPSeq
 
-- MYC ATAC-seq:
-https://github.com/Kusuru-Meghana/LUAD_MYC_ATACseq
+- **siMYC RNA-seq pipeline:**  
+  https://github.com/Kusuru-Meghana/LUAD_MYC_RNASeq
 
-## Summary
+- **ATAC-seq pipeline:**  
+  https://github.com/Kusuru-Meghana/LUAD_MYC_ATACSeq
 
-This project demonstrates how multi-omics integration can be used to identify biologically meaningful transcription factor targets, moving beyond single-layer analyses to define true regulatory networks in cancer.
+- **ChIP-seq + RNA-seq integration:**  
+  https://github.com/Kusuru-Meghana/LUAD_MYC_ChIPSeq_RNASeq_Integration
+
+---
+
+## Reproducibility
+
+- Modular scripts used for all analyses
+- Conda / R environments documented in individual pipeline repositories
+- Raw human sequencing data not included; pipelines assume local data paths
+- Integration logic implemented in reusable R scripts
+
+---
+
+## Author & Contribution
+
+**Meghana Kusuru**  
+M.S. Bioinformatics & Computational Biology  
+
+Designed and implemented the full multi-omics integration strategy, performed all analyses,
+and interpreted biological results linking MYC binding, expression, and chromatin accessibility.
+
+---
+
+## Why This Project Matters
+
+This repository demonstrates:
+- End-to-end NGS data integration
+- Multi-omics regulatory reasoning
+- Reproducible, modular bioinformatics workflows
+- Strong biological interpretation of oncogenic transcriptional control
+
+This skill set directly aligns with **entry-level bioinformatics and computational biology roles**
+in academic, clinical, and industry settings.
