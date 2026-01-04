@@ -3,10 +3,20 @@
 
 ⭐ **This repository is the main entry point for the MYC multi-omics project.**
 
-This project integrates **MYC ChIP-seq**, **siMYC RNA-seq**, and **ATAC-seq** data to identify
-**high-confidence, direct MYC target genes** in **A549 lung adenocarcinoma cells**.
+It integrates MYC ChIP-seq, siMYC RNA-seq, and ATAC-seq data to identify
+**high-confidence, direct MYC target genes** in A549 lung adenocarcinoma cells.
 By requiring agreement across DNA binding, expression change, and chromatin accessibility,
-the analysis filters out non-functional binding events and indirect transcriptional effects.
+this analysis filters non-functional binding events and indirect transcriptional effects.
+
+---
+
+## Quick Overview
+
+- **Cell line:** A549 lung adenocarcinoma  
+- **Data:** MYC ChIP-seq, siMYC RNA-seq, ATAC-seq  
+- **Goal:** Identify direct MYC targets by intersecting binding, expression response, and chromatin accessibility  
+- **Key result:** ~268 MYC-bound genes with MYC-dependent expression, prioritized within accessible chromatin  
+- **Approach:** Modular NGS pipelines (separate repos) + R-based multi-layer integration  
 
 ---
 
@@ -32,7 +42,8 @@ Specifically:
 
 ### Layer 2 — RNA-seq (siMYC knockdown)
 - Conditions: Control (MYC-high) vs siMYC (MYC-low)
-- Output: Differentially expressed genes upon MYC suppression
+- Replicates: 2 control + 2 knockdown
+- Output: Differentially expressed genes after MYC suppression
 
 ### Layer 3 — ATAC-seq
 - Genome-wide chromatin accessibility landscape
@@ -72,10 +83,18 @@ This strategy removes:
 
 ## Key Results
 
-- ~5,100 genes bound by MYC (ChIP-seq)
-- ~268 genes both MYC-bound **and** differentially expressed after MYC knockdown
-- ~62,000 ATAC-seq peaks defining open chromatin in A549
-- ~45% of MYC binding sites occur in accessible chromatin
+- **~5,100 MYC-bound genes** identified from ChIP-seq  
+  (see `results/chipseq/annotated_peaks.tsv`)
+
+- **~268 genes** both MYC-bound and differentially expressed after MYC knockdown  
+  (see `results/integration/direct_myc_targets.tsv`)
+
+- **~62,000 ATAC-seq peaks** defining open chromatin in A549  
+  (see `results/atacseq/atac_merged_peaks.bed`)
+
+- **~45% of MYC binding sites** occur in accessible chromatin  
+  (see `results/integration/myc_atac_overlap_stats.tsv`)
+
 - Direct MYC targets are enriched for:
   - Cell cycle and proliferation
   - RNA processing and ribosome biogenesis
@@ -85,62 +104,141 @@ This strategy removes:
 
 ## Biological Interpretation
 
-This analysis demonstrates that MYC functions as a **direct transcriptional amplifier**
-in A549 lung cancer cells by binding promoter-proximal, accessible chromatin regions
-of genes involved in growth and biosynthetic programs.
+- MYC primarily acts as a **direct transcriptional amplifier** in A549 cells by binding
+  promoter-proximal, accessible chromatin of genes involved in growth and biosynthesis.
 
-Upon MYC knockdown:
-- Proliferative and transcriptional machinery collapses
-- Senescence, stress, and immune-related pathways become activated
+- MYC knockdown leads to:
+  - Collapse of proliferative and transcriptional programs
+  - Activation of senescence, stress, and immune-related pathways
 
-Integrating binding, expression, and chromatin accessibility distinguishes
-**functional MYC regulatory events** from non-productive binding,
-providing a mechanistic view of MYC-driven oncogenic regulation.
+- Integrating binding (ChIP-seq), expression (RNA-seq), and accessibility (ATAC-seq)
+  separates **functional MYC regulation** from non-productive binding events.
+
+---
+
+## How to Use This Repository
+
+This repository performs **integration and interpretation**.
+Raw data processing is handled in the standalone pipeline repositories linked below.
+
+1. Run each standalone pipeline following instructions in their respective repos:
+   - MYC ChIP-seq
+   - siMYC RNA-seq
+   - ATAC-seq
+
+2. Place summarized result tables into the `data/` directory here:
+   - ChIP-seq peak annotations  
+   - DESeq2 differential expression results  
+   - ATAC-seq merged peak set  
+
+3. Run the integration scripts, for example:
+   ```bash
+   Rscript scripts/01_build_myc_target_sets.R
+   Rscript scripts/02_enrichment_and_visualization.R
+   ```
+
+4. Inspect outputs:
+   - Final MYC target gene lists and summary statistics in `results/`
+   - Pathway enrichment tables and figures in `results/figures/`
 
 ---
 
 ## Linked Standalone Pipelines
 
-- **MYC ChIP-seq pipeline:**  
-  https://github.com/Kusuru-Meghana/LUAD_MYC_ChIPSeq
+MYC ChIP-seq pipeline:
+https://github.com/Kusuru-Meghana/LUAD_MYC_ChIPSeq
 
-- **siMYC RNA-seq pipeline:**  
-  https://github.com/Kusuru-Meghana/LUAD_MYC_RNASeq
+siMYC RNA-seq pipeline:
+https://github.com/Kusuru-Meghana/LUAD_MYC_RNASeq
 
-- **ATAC-seq pipeline:**  
-  https://github.com/Kusuru-Meghana/LUAD_MYC_ATACSeq
+ATAC-seq pipeline:
+https://github.com/Kusuru-Meghana/LUAD_MYC_ATACSeq
 
-- **ChIP-seq + RNA-seq integration:**  
-  https://github.com/Kusuru-Meghana/LUAD_MYC_ChIPSeq_RNASeq_Integration
+ChIP-seq + RNA-seq integration:
+https://github.com/Kusuru-Meghana/LUAD_MYC_ChIPSeq_RNASeq_Integration
 
 ---
 
-## Reproducibility
+## Reproducibility Notes
 
 - Modular scripts used for all analyses
-- Conda / R environments documented in individual pipeline repositories
+
+- Environments documented in individual pipeline repositories
+
 - Raw human sequencing data not included; pipelines assume local data paths
+
 - Integration logic implemented in reusable R scripts
+
+---
+
+## Technologies Used
+
+- NGS assays: ChIP-seq, RNA-seq, ATAC-seq
+
+- Tools: Bowtie2, HISAT2, MACS2/MACS3, featureCounts, DESeq2, ChIPseeker
+
+- Languages: R, Bash
+
+- Analysis: Differential expression, peak annotation, pathway enrichment
 
 ---
 
 ## Author & Contribution
 
-**Meghana Kusuru**  
-M.S. Bioinformatics & Computational Biology  
+Meghana Kusuru
+M.S. Bioinformatics & Computational Biology
 
-Designed and implemented the full multi-omics integration strategy, performed all analyses,
+Designed and implemented the multi-omics integration strategy, performed all analyses,
 and interpreted biological results linking MYC binding, expression, and chromatin accessibility.
 
 ---
 
 ## Why This Project Matters
 
-This repository demonstrates:
-- End-to-end NGS data integration
-- Multi-omics regulatory reasoning
-- Reproducible, modular bioinformatics workflows
-- Strong biological interpretation of oncogenic transcriptional control
+This project demonstrates:
 
-This skill set directly aligns with **entry-level bioinformatics and computational biology roles**
+End-to-end NGS data integration
+
+Multi-omics regulatory reasoning
+
+Reproducible, modular bioinformatics workflows
+
+Strong biological interpretation of oncogenic transcriptional control
+
+This skill set directly aligns with entry-level bioinformatics and computational biology roles
 in academic, clinical, and industry settings.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
